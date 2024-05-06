@@ -1,81 +1,71 @@
-import 'dart:isolate';
-import 'dart:ui';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
-
-String portName = 'audio_isolate';
-
-fcmBackgroundHandler() async {
-  ReceivePort receiver = ReceivePort();
-  IsolateNameServer.registerPortWithName(receiver.sendPort, portName);
-
-  receiver.listen((message) async {
-    debugPrint('oyeah play $message');
-    if (message == "play") {
-      await FlutterRingtonePlayer().play(
-        looping: true,
-        fromAsset: 'assets/ringtone.mp3',
-      );
-    }
-    if (message == "stop") {
-      await FlutterRingtonePlayer().stop();
-    }
-  });
-}
+import 'package:isolate_audio/firstapproach.dart';
+import 'package:isolate_audio/secondapproach.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(const SstartApp());
+}
+
+class SstartApp extends StatelessWidget {
+  const SstartApp({Key? key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: MyApp(),
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key});
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  AudioPlayer? audioPlayer;
   @override
   void initState() {
     super.initState();
-
-    register();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Audio Player'),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  IsolateNameServer.lookupPortByName(portName)?.send("play");
-                },
-                child: const Text('Play'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  IsolateNameServer.lookupPortByName(portName)?.send("stop");
-                },
-                child: const Text('Stop'),
-              ),
-            ],
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Isolate'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Firstapproach(),
+                  ),
+                );
+              },
+              child: const Text('First Approach'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Homescreen(),
+                  ),
+                );
+              },
+              child: const Text('Second Approach'),
+            ),
+          ],
         ),
       ),
     );
-  }
-
-  void register() {
-    fcmBackgroundHandler();
   }
 }
